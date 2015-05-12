@@ -95,12 +95,14 @@ class Client(object):
         """
         Update your Tinder profile.
 
-        :param gender: 0 for male, 1 for female.
+        :param gender: 0 for male, 1 for female, -1 for both.
         :param min_age: minimum age for matches.
         :param max_age: maximum age for matches.
         :param distance: max search radius in kilometers.
         :type bool:
         """
+        if gender not in (-1, 0, 1):
+            return False
         data = {'gender': gender, 'age_filter_min': min_age,
                 'age_filter_max': max_age, 'distance_filter': distance}
         resp = self._post('profile', data=data)
