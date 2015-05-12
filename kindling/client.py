@@ -45,9 +45,6 @@ class Client(object):
         headers.update({'content-type': 'application/json'})
         if self.auth_token:
             headers.update({'X-Auth-Token': self.auth_token})
-        print uri
-        print headers
-        print data
         req = requests.post("{0}{1}".format(tinder_server, uri),
                             headers=headers, data=json.dumps(data))
         req.raise_for_status()
@@ -55,11 +52,12 @@ class Client(object):
 
     def authorize(self, fb_id, fb_token):
         data = {'facebook_token': fb_token,
-                 'facebook_id': fb_id}
+                'facebook_id': fb_id}
         resp = self.post('auth', data)
         if 'token' not in resp:
             raise requests.HTTPError('Unable to authorize')
         self.auth_token = resp['token']
+        return True
 
     def update_profile(self, gender, min_age, max_age, distance):
         """
@@ -78,6 +76,9 @@ class Client(object):
             return True
         return False
 
+    def update_location(self, latitude, longitude):
+        return self.post('user/ping', {'lat: latitude', 'lon': longitude})
+
     def report_user(self, user_id, reason):
         """
         Report a user.
@@ -87,7 +88,7 @@ class Client(object):
         """
         if reason not in (1, 2):
             return False
-        self.post('report/{0}'.format(user_id), {'cause': reason})
+        return self.post('report/{0}'.format(user_id), {'cause': reason})
 
     def send_message(self, user_id, message):
         self.post('user/matches/{0}'.format(user_id), {'message': message})
@@ -95,20 +96,20 @@ class Client(object):
     def _like_unlike(self, action, user_id):
         if action not in ('like', 'unlike'):
             return False
-        self.get("{0}/{1}".format(action, user_id))
+        return self.get("{0}/{1}".format(action, user_id))
 
     def like(self, user_id):
-        self._like_pass('like', user_id)
+        return self._like_pass('like', user_id)
 
     def unlike(self, user_id):
-        self._like_pass('unlike', user_id)
+        return self._like_pass('unlike', user_id)
 
     @property
     def recommendations(self):
         resp = self.get('user/recs')
-        print resp
+        return resp
 
     @property
     def updates(self):
         resp = self.get('updates')
-        print resp
+        return resp
