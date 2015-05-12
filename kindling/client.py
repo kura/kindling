@@ -18,6 +18,8 @@ class Client(object):
         """
         headers.update(self.base_headers)
         headers.update({'content-type': 'application/json'})
+        if self.auth_token:
+            h = {'X-Auth-Token': self.auth_token}
         resp = requests.get("{0}{1}".format(tinder_server, uri),
                             headers=headers)
         if resp.status_code >= 300:
@@ -31,15 +33,20 @@ class Client(object):
         POST some JSON data a Tinder API URI. Returns the decoded JSON response.
 
         :param uri: URI to GET.
+        :param data: dictionary of data to send.
         :param tinder_server: (optional) URL to the Tinder API.
         :param headers: (optional) dictionary of addtional headers to send the
                         Tinder API.
-        :param
         :rtype dict:
         """
         headers.update(self.base_headers)
         headers.update({'content-type': 'application/json'})
+        if self.auth_token:
+            h = {'X-Auth-Token': self.auth_token}
         data = json.dumps(data)
+        print uri
+        print headers
+        print data
         req = requests.post("{0}{1}".format(tinder_server, uri),
                             headers=headers, data=data)
         req.raise_for_status()
@@ -53,9 +60,25 @@ class Client(object):
             raise requests.HTTPError('Unable to authorize')
         self.auth_token = resp['token']
 
+    #TODO: fix... Lol.
+    def update_profile(self, gender, min_age, max_age, distance):
+        """
+        Update your Tinder profile.
+
+        :param gender: 0 for male, 1 for female.
+        :param min_age: minimum age for matches.
+        :param max_age: maximum age for matches.
+        :param distance: max search radius in kilometers.
+        :type dict:
+        """
+        data = {'gender': gender, 'age_filter_min': min_age,
+                'age_filter_max': max_age, 'distance_filter': distance}
+        resp = self.post('profile', data=data)
+        print resp
+
+
     def recommendations(self):
-        h = {'X-Auth-Token': self.auth_token}
-        resp = self.get('user/recs', headers=h)
+        resp = self.get('user/recs')
         print resp
 
     def updates(self):
