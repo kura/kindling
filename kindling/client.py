@@ -68,12 +68,25 @@ class Client(object):
         :param min_age: minimum age for matches.
         :param max_age: maximum age for matches.
         :param distance: max search radius in kilometers.
-        :type dict:
+        :type bool:
         """
         data = {'gender': gender, 'age_filter_min': min_age,
                 'age_filter_max': max_age, 'distance_filter': distance}
         resp = self.post('profile', data=data)
-        print resp
+        if 'interests' in resp:
+            return True
+        return False
+
+    def report_user(self, user_id, reason):
+        """
+        Report a user.
+
+        :param user_id:
+        :param reason: 1 for spam, 2 for inappropriate/offensive.
+        """
+        if reason not in (1, 2):
+            return False
+        self.post('report/{0}'.format(user_id), {'cause': reason})
 
 
     def recommendations(self):
