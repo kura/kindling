@@ -4,7 +4,8 @@ import requests
 
 class Client(object):
     auth_token = None
-    base_headers = {'app_version': 3, 'platform': 'ios'}
+    base_headers = {'app_version': 3, 'platform': 'ios',
+                    'user-agent': 'Tinder/3.0.4 (iPhone; iOS 7.1; Scale/2.00)'}
 
     def get(self, uri, headers={}, tinder_server="https://api.gotinder.com/"):
         """
@@ -88,10 +89,26 @@ class Client(object):
             return False
         self.post('report/{0}'.format(user_id), {'cause': reason})
 
+    def send_message(self, user_id, message):
+        self.post('user/matches/{0}'.format(user_id), {'message': message})
 
+    def _like_unlike(self, action, user_id):
+        if action not in ('like', 'unlike'):
+            return False
+        self.get("{0}/{1}".format(action, user_id))
+
+    def like(self, user_id):
+        self._like_pass('like', user_id)
+
+    def unlike(self, user_id):
+        self._like_pass('unlike', user_id)
+
+    @property
     def recommendations(self):
         resp = self.get('user/recs')
         print resp
 
+    @property
     def updates(self):
-        pass
+        resp = self.get('updates')
+        print resp
