@@ -51,6 +51,13 @@ class Client(object):
         return json.loads(req.content)
 
     def authorize(self, fb_id, fb_token):
+        """
+        Authorize with Tinder.
+
+        :param fb_id: Facebook user ID.
+        :param fb_token: Facebook auth token.
+        :rtype bool:
+        """
         data = {'facebook_token': fb_token,
                 'facebook_id': fb_id}
         resp = self._post('auth', data)
@@ -77,6 +84,13 @@ class Client(object):
         return False
 
     def update_location(self, latitude, longitude):
+        """
+        Update your location using latitude and longitude.
+
+        :param latitude:
+        :param longitude:
+        :rtype dict:
+        """
         return self._post('user/ping', {'lat': latitude, 'lon': longitude})
 
     def report_user(self, user_id, reason):
@@ -85,13 +99,21 @@ class Client(object):
 
         :param user_id:
         :param reason: 1 for spam, 2 for inappropriate/offensive.
+        :rtype dict:
         """
         if reason not in (1, 2):
             return False
         return self._post('report/{0}'.format(user_id), {'cause': reason})
 
     def send_message(self, user_id, message):
-        self._post('user/matches/{0}'.format(user_id), {'message': message})
+        """
+        Send user a message. Will not work if user is not a match.
+
+        :param user_id: ID of user to send the message.
+        :param message: Message to send.
+        :rtype dict:
+        """
+        return self._post('user/matches/{0}'.format(user_id), {'message': message})
 
     def _like_unlike(self, action, user_id):
         if action not in ('like', 'unlike'):
@@ -99,15 +121,37 @@ class Client(object):
         return self._get("{0}/{1}".format(action, user_id))
 
     def like(self, user_id):
+        """
+        Like/Swipe right a user.
+
+        :param user_id: User ID to Like/Match.
+        :rtype dict:
+        """
         return self._like_pass('like', user_id)
 
     def unlike(self, user_id):
+        """
+        Unlike/Pass/Swipe left a user.
+
+        :param user_id: User to Unlike/Pass/Swipe left.
+        :rtype dict:
+        """
         return self._like_pass('unlike', user_id)
 
     @property
     def recommendations(self):
+        """
+        Recommendations. TODO: update with specifics.
+
+        :rtype dict:
+        """
         return self._get('user/recs')
 
     @property
     def updates(self):
+        """
+        Updates. TODO: update with specifics.
+
+        :rtype dict:
+        """
         return self._get('updates')
