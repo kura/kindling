@@ -19,7 +19,7 @@ class Client(object):
         headers.update(self.base_headers)
         headers.update({'content-type': 'application/json'})
         if self.auth_token:
-            h = {'X-Auth-Token': self.auth_token}
+            headers.update({'X-Auth-Token': self.auth_token})
         resp = requests.get("{0}{1}".format(tinder_server, uri),
                             headers=headers)
         if resp.status_code >= 300:
@@ -30,7 +30,8 @@ class Client(object):
     def post(self, uri, data, headers={},
              tinder_server="https://api.gotinder.com/"):
         """
-        POST some JSON data a Tinder API URI. Returns the decoded JSON response.
+        POST some JSON data a Tinder API URI. Returns the decoded JSON
+        response.
 
         :param uri: URI to GET.
         :param data: dictionary of data to send.
@@ -42,13 +43,12 @@ class Client(object):
         headers.update(self.base_headers)
         headers.update({'content-type': 'application/json'})
         if self.auth_token:
-            h = {'X-Auth-Token': self.auth_token}
-        data = json.dumps(data)
+            headers.update({'X-Auth-Token': self.auth_token})
         print uri
         print headers
         print data
         req = requests.post("{0}{1}".format(tinder_server, uri),
-                            headers=headers, data=data)
+                            headers=headers, data=json.dumps(data))
         req.raise_for_status()
         return json.loads(req.content)
 
@@ -60,7 +60,6 @@ class Client(object):
             raise requests.HTTPError('Unable to authorize')
         self.auth_token = resp['token']
 
-    #TODO: fix... Lol.
     def update_profile(self, gender, min_age, max_age, distance):
         """
         Update your Tinder profile.
