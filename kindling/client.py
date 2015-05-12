@@ -7,7 +7,7 @@ class Client(object):
     base_headers = {'app_version': 3, 'platform': 'ios',
                     'user-agent': 'Tinder/3.0.4 (iPhone; iOS 7.1; Scale/2.00)'}
 
-    def get(self, uri, headers={}, tinder_server="https://api.gotinder.com/"):
+    def _get(self, uri, headers={}, tinder_server="https://api.gotinder.com/"):
         """
         GET a URI from the Tinder API. Returns the decoded JSON response.
 
@@ -28,7 +28,7 @@ class Client(object):
                                      reason=resp.reason)
         return json.loads(resp.content)
 
-    def post(self, uri, data, headers={},
+    def _post(self, uri, data, headers={},
              tinder_server="https://api.gotinder.com/"):
         """
         POST some JSON data a Tinder API URI. Returns the decoded JSON
@@ -53,7 +53,7 @@ class Client(object):
     def authorize(self, fb_id, fb_token):
         data = {'facebook_token': fb_token,
                 'facebook_id': fb_id}
-        resp = self.post('auth', data)
+        resp = self._post('auth', data)
         if 'token' not in resp:
             raise requests.HTTPError('Unable to authorize')
         self.auth_token = resp['token']
@@ -71,13 +71,13 @@ class Client(object):
         """
         data = {'gender': gender, 'age_filter_min': min_age,
                 'age_filter_max': max_age, 'distance_filter': distance}
-        resp = self.post('profile', data=data)
+        resp = self._post('profile', data=data)
         if 'interests' in resp:
             return True
         return False
 
     def update_location(self, latitude, longitude):
-        return self.post('user/ping', {'lat: latitude', 'lon': longitude})
+        return self._post('user/ping', {'lat': latitude, 'lon': longitude})
 
     def report_user(self, user_id, reason):
         """
@@ -88,15 +88,15 @@ class Client(object):
         """
         if reason not in (1, 2):
             return False
-        return self.post('report/{0}'.format(user_id), {'cause': reason})
+        return self._post('report/{0}'.format(user_id), {'cause': reason})
 
     def send_message(self, user_id, message):
-        self.post('user/matches/{0}'.format(user_id), {'message': message})
+        self._post('user/matches/{0}'.format(user_id), {'message': message})
 
     def _like_unlike(self, action, user_id):
         if action not in ('like', 'unlike'):
             return False
-        return self.get("{0}/{1}".format(action, user_id))
+        return self._get("{0}/{1}".format(action, user_id))
 
     def like(self, user_id):
         return self._like_pass('like', user_id)
@@ -106,10 +106,8 @@ class Client(object):
 
     @property
     def recommendations(self):
-        resp = self.get('user/recs')
-        return resp
+        return self._get('user/recs')
 
     @property
     def updates(self):
-        resp = self.get('updates')
-        return resp
+        return self._get('updates')
